@@ -21,7 +21,7 @@ def run_dummy_server():
     server = HTTPServer(('0.0.0.0', 10000), DummyServer)
     server.serve_forever()
 
-# সাধারণ মেসেজ পাঠানোর ফাংশন
+# সাধারণ মেসেজ পাঠানোর ফাংশন (রিকোয়েস্টের জন্য)
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {'chat_id': GROUP_ID, 'text': text, 'parse_mode': 'Markdown'}
@@ -33,14 +33,14 @@ def send_telegram_message(text):
         print(f"Telegram Send Error: {e}")
     return None
 
-# নির্দিষ্ট মেসেজে রিপ্লাই দিয়ে মেসেজ পাঠানোর ফাংশan
+# নির্দিষ্ট মেসেজে রিপ্লাই দিয়ে মেসেজ পাঠানোর ফাংশন (কমপ্লিট করার জন্য)
 def send_telegram_reply(text, reply_to_message_id):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': GROUP_ID, 
         'text': text, 
         'parse_mode': 'Markdown',
-        'reply_to_message_id': reply_to_message_id  # এই আইডিটি রিপ্লাই করতে সাহায্য করে
+        'reply_to_message_id': reply_to_message_id
     }
     try:
         requests.post(url, json=payload, timeout=10)
@@ -49,23 +49,20 @@ def send_telegram_reply(text, reply_to_message_id):
 
 def start_withdrawal_simulator():
     print("🚀 উইথড্র সিমুলেটর বট সার্ভার থেকে চালু হচ্ছে...")
-    send_telegram_message("⚙️ *SYSTEM UPDATE:* উইথড্র রিকোয়েস্ট ও রিপ্লাই কমপ্লিট সিস্টেম সফলভাবে ক্লাউডে সেটআপ হয়েছে!")
+    send_telegram_message("⚙️ *SYSTEM UPDATE:* টাইমিং মডিফিকেশন সফলভাবে আপডেট করা হয়েছে!\n⏱️ _Request: 10-12s | Reply: 20-22s_")
     
-    # সিমুলেশনের জন্য ডেটা লিস্ট
     names = ["Arif Khan", "Sumon Ahmed", "Mitu Akter", "Rakib Hasan", "Nadia Islam", "Tasnim Rahman", "Sabbir Hossain", "Fahim Shahriar"]
     wallets = ["bKash (Personal)", "Nagad (Personal)", "Rocket (Personal)", "Upay Wallet", "Binance Pay ID", "TRC20 Wallet"]
     
     while True:
-        # র্যান্ডম ডেটা জেনারেট করা
         customer = random.choice(names)
         wallet_type = random.choice(wallets)
         amount = random.randint(1000, 25000)
         tx_id = f"WTH{random.randint(100000, 999999)}BD"
         
-        # বর্তমান লাইভ সময় (ঘন্টা:মিনিট:সেকেন্ড) বের করা
         current_time = datetime.now().strftime("%I:%M:%S %p")
         
-        # ১. উইথড্র রিকোয়েস্ট মেসেজ তৈরি
+        # ১. উইথড্র রিকোয়েস্ট মেসেজ
         request_msg = (
             f"📥 *WITHDRAWAL REQUEST* 📥\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
@@ -79,21 +76,38 @@ def start_withdrawal_simulator():
             f"🤖 _Render অটোমেটেড রিকোয়েস্ট সিস্টেম।_"
         )
         
-        # রিকোয়েস্ট মেসেজ পাঠিয়ে তার ID সংগ্রহ করা
         request_message_id = send_telegram_message(request_msg)
         
-        # যদি রিকোয়েস্ট মেসেজটি সফলভাবে গ্রুপে যায়, তবে ৫-৭ সেকেন্ড অপেক্ষা করে রিপ্লাই পাঠানো হবে
         if request_message_id:
-            # আপনার রিকোয়ারমেন্ট অনুযায়ী ৫ থেকে ৭ সেকেন্ডের র্যান্ডম বিরতি (Sleep)
-            sleep_time = random.randint(5, 7)
-            time.sleep(sleep_time)
+            # 👉 আপনার রিকোয়ারমেন্ট অনুযায়ী ২০ থেকে ২২ সেকেন্ডের র্যান্ডম বিরতি (কমপ্লিট মেসেজের জন্য)
+            reply_sleep = random.randint(20, 22)
+            time.sleep(reply_sleep)
             
-            # উইথড্র কমপ্লিট হওয়ার লাইভ সময় (ঘন্টা:মিনিট:সেকেন্ড)
             complete_time = datetime.now().strftime("%I:%M:%S %p")
             
-            # ২. উইথড্র কমপ্লিট মেসেজ তৈরি (যা রিকোয়েস্টের রিপ্লাই হিসেবে যাবে)
+            # ২. উইথড্র কমপ্লিট মেসেজ (যা রিকোয়েস্টের রিপ্লাই হিসেবে যাবে)
             complete_msg = (
                 f"✅ *WITHDRAWAL COMPLETED* ✅\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"👤 *User:* {customer}\n"
+                f"💰 *Amount Sent:* ৳{amount:,.2f} BDT\n"
+                f"💳 *Method:* {wallet_type}\n"
+                f"🕒 *Done Time:* {complete_time}\n"
+                f"🆔 *Withdraw ID:* `{tx_id}`\n"
+                f"🟢 *Status:* Successfully Paid\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"💵 _টাকা সফলভাবে ওয়ালেটে পাঠিয়ে দেওয়া হয়েছে!_"
+            )
+            
+            send_telegram_reply(complete_msg, request_message_id)
+            
+        # 👉 আপনার রিকোয়ারমেন্ট অনুযায়ী পরবর্তী নতুন রিকোয়েস্ট আসার আগে ১০ থেকে ১২ সেকেন্ডের বিরতি
+        next_request_sleep = random.randint(10, 12)
+        time.sleep(next_request_sleep)
+
+if __name__ == '__main__':
+    Thread(target=run_dummy_server, daemon=True).start()
+    start_withdrawal_simulator()                f"✅ *WITHDRAWAL COMPLETED* ✅\n"
                 f"━━━━━━━━━━━━━━━━━━━━\n"
                 f"👤 *User:* {customer}\n"
                 f"💰 *Amount Sent:* ৳{amount:,.2f} BDT\n"
